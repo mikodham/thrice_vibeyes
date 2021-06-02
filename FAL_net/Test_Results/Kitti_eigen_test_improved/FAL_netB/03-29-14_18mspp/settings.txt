@@ -1,0 +1,28 @@
+############################################################
+# FAL-net        -         Pytorch implementation          #
+# by Juan Luis Gonzalez   juanluisgb@kaist.ac.kr           #
+############################################################
+-------YOUR TRAINING SETTINGS---------
+           data: D:\Dhammiko\KAIST\2021Spring\Engineering Design\DepthEstimator\FAL_net
+      tdataName: Kitti_eigen_test_improved
+    rel_baselne: 1
+       max_disp: 300
+       min_disp: 2
+     batch_size: 1
+       evaluate: True
+           save: False
+        save_pc: False
+       save_pan: False
+     save_input: False
+        workers: 4
+         sparse: False
+     print_freq: 10
+         gpu_no: 1
+        dataset: Kitti_stage2
+     time_stamp: 03-29-14_18
+          model: FAL_netB
+      no_levels: 49
+        details: ,e20es,b4,lr5e-05/checkpoint.pth.tar
+ f_post_process: False
+ms_post_process: True
+         median: False

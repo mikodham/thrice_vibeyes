@@ -1,0 +1,37 @@
+############################################################
+# FAL_net - Pytorch implementation                         #
+# by Juan Luis Gonzalez   juanluisgb@kaist.ac.kr           #
+############################################################
+-------YOUR TRAINING SETTINGS---------
+           data: C:\Users\Kaist\Desktop
+      dataName0: Kitti
+    train_split: eigen_train_split
+      vdataName: Kitti2015
+      rel_baset: 1
+       max_disp: 300
+       min_disp: 2
+         gpu_no: 0
+        m_model: FAL_netB
+      no_levels: 49
+            a_p: 0.01
+           a_sm: 0.0015625
+           a_mr: 1
+        workers: 4
+     batch_size: 4
+    crop_height: 192
+     crop_width: 640
+    tbatch_size: 1
+      optimizer: adam
+             lr: 5e-05
+           beta: 0.999
+       momentum: 0.5
+     milestones: [5, 10]
+   weight_decay: 0.0
+     bias_decay: 0.0
+         epochs: 20
+     epoch_size: 0
+         sparse: True
+     print_freq: 100
+    start_epoch: 0
+      fix_model: Kitti_stage1\03-25-15_29\FAL_netB,e50es,b4,lr0.0001/checkpoint.pth.tar
+     pretrained: Kitti_stage1\03-25-15_29\FAL_netB,e50es,b4,lr0.0001/checkpoint.pth.tar

@@ -1,0 +1,8 @@
+
+Number of parameters 16974354
+
+EPE 0
+
+Kitti metrics: 
+   abs_rel    sq_rel       rms   log_rms        a1        a2        a3
+    0.0000    0.0000    0.0000    0.0000    0.0000    0.0000    0.0000
