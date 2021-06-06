@@ -168,11 +168,11 @@ if __name__ == '__main__':
     pan_model = torch.nn.DataParallel(pan_model, device_ids=[0]).cuda()
 
     print("-------------DEPTH ESTIMATE--------------")
-    vid_file = 'S10P_FollowMan.mp4'  # 'S10P_NoZoom.mp4'  #
-    vid_directory = os.path.join(os.getcwd(), 'Video_Testing', vid_file)
+    vid_file = 'S10P_IdeaFactory1'  # 'S10P_NoZoom.mp4'  #
+    vid_directory = os.path.join(os.getcwd(), 'Video_Testing', vid_file + '.mp4')
     vidcap = cv2.VideoCapture(vid_directory)
     sec = 0
-    frameRate = 1  # //it will capture image in each 0.5 second
+    frameRate = 0.5  # //it will capture image in each 0.5 second
     count = 1
     results = []
     success, frame = getFrame(sec)
@@ -190,7 +190,7 @@ if __name__ == '__main__':
             # frame = np.swapaxes(frame, 1, 2)    # SHAPE:  (3, 720, 1280)
 
             # TODO: Reduce frame resolution
-
+            frame = cv2.resize(frame, (480, 140), fx=0, fy=0, interpolation=cv2.INTER_CUBIC)
             torch_frame = torch.from_numpy(frame)
             torch_frame = torch_frame.type(torch.FloatTensor)
             prev = time.time()
@@ -218,10 +218,10 @@ if __name__ == '__main__':
 
     print("--------SAVING_GIF-----------")
     from array2gif import write_gif
-    gif_name = '06-02' + 'follow_aMan_' + str(time.time()) + '.gif'
+    gif_name = '06-02' + vid_file + str(time.time()) + '.gif'
     gif_dir = os.path.join(os.getcwd(), "Video_Testing", "gif", gif_name)
     write_gif(dataset_gif, gif_dir, fps=1/frameRate)
-    #: param dataset: A NumPy arrayor list of arrays with shape rgb x rows x cols and integer values in [0, 255].
+    #: param dataset: A NumPy array or list of arrays with shape rgb x rows x cols and integer values in [0, 255].
     print('---------------FINISH------------')
     '''
         Results is a List of Disparity, where disparity is torch.tensor datatype

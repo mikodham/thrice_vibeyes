@@ -6,3 +6,4 @@ tensorboardX
 imageio
 opencv-python
 array2gif
+urllib3
