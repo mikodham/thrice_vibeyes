@@ -1,9 +1,9 @@
 #!/usr/bin/python3
-from PIL import Image, ImageSequence
+# from PIL import Image, ImageSequence
+# import matplotlib.pyplot as plt
 import numpy as np
-import warnings
-import pprint
-#from bluetooth import *
+# import warnings
+# from bluetooth import *
 
 ############ For bluetooth! #####################3
 # target_name = "ArduinoNanoBLE"
@@ -26,63 +26,51 @@ import pprint
 # s = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
 # s.connect((serverMACAddress, port))
 
-#######################################################3
-im = Image.open("teaser.gif")
-print(im)
-# resizeImg = imresize(depthImg,[300 410]); % 320 x 240 pixels
-# width = 410; height = 300;
-index = 1
 
-height = 390
-width = 480
-label = np.zeros((390, 480))
+def dep2level(frame):  # input is disparity
+    width, height = frame.shape  # 480, 140
+    label = np.zeros((width, height))
+    level = np.zeros((10,10))
+    # many = (frame > 230).astype(int)
+    many = (frame > 250).astype(int)
+    for boundary in [230, 200, 170, 140, 120, 80, 60, 0]:
+        many += (frame > boundary).astype(int)
 
-lev = np.zeros((480, 10))
-level = np.zeros((10,10))
+    for posx in range(0, width, width//10) :
+        for posy in range(0, height, height//10):
+            level[posx//(width//10), posy//(height//10)] = np.around(np.mean(many[posx:posx+(width//10),posy:posy+(height//10)]))
+    # print(level)
+    return many
+
+    # print(many)
+    # for posx in range(width-1):  # 0~479
+    #     for posy in range(height-1):  # 0~259
+    #         if pixel_values[posx][posy] > 230 :
+    #             label[posx,posy] = 0
+    #         elif pixel_values[posx][posy] <= 230 and pixel_values[posx][posy] > 200 :
+    #             label[posx,posy] = 1
+    #         elif pixel_values[posx][posy] <= 200 and pixel_values[posx][posy] > 170 :
+    #             label[posx,posy] = 2
+    #         elif pixel_values[posx][posy] <=170 and pixel_values[posx][posy] > 140 :
+    #             label[posx,posy] = 3
+    #         elif pixel_values[posx][posy] <=140 and pixel_values[posx][posy] > 120 :
+    #             label[posx,posy] = 4
+    #         elif pixel_values[posx][posy] <=120 and  pixel_values[posx][posy] > 100 :
+    #             label[posx,posy] = 5
+    #         elif pixel_values[posx][posy] <=100 and  pixel_values[posx][posy] > 80 :
+    #             label[posx,posy] = 6
+    #         elif pixel_values[posx][posy] <=80 and  pixel_values[posx][posy] > 60 :
+    #             label[posx,posy] = 7
+    #         else :
+    #             label[posx,posy] = 8
+    # print(label.shape)
 
 
 
-for frame in ImageSequence.Iterator(im):
-    
-    index += 1
-    print(index)
-    # index % 10 !=0: continue
-    
-    # frame.save("frame%d.png" % index)
-    width, height = frame.size
-    channels = 1
+    # np.savetxt("level.csv", level, delimiter=",")
+    # plt.imshow(frame)
+    # plt.pause(0.00000001)
 
-    pixel_values = list(frame.getdata())
-    pixel_values = np.array(pixel_values).reshape((width, height, channels))
-    # pprint.pprint(pixel_values.shape)
-    pixeling = pixel_values[:,:,0]
-    # pprint.pprint(pixel_values)
-    for posy in range(width):
-        for posx in range(height):
-            if pixel_values[posx][posy] > 230 :
-                label[posx,posy] = 1
-            elif pixel_values[posx][posy] <= 230 & pixel_values[posx][posy] > 200 :
-                label[posx,posy] = 2
-            elif pixel_values[posx][posy] <= 200 & pixel_values[posx][posy] > 170 :
-                label[posx,posy] = 3
-            elif pixel_values[posx][posy] <=170 & pixel_values[posx][posy] > 140 :
-                label[posx,posy] = 4
-            elif pixel_values[posx][posy] <=140 & pixel_values[posx][posy] > 110 :
-                label[posx,posy] = 5
-            elif pixel_values[posx][posy] <=110 & pixel_values[posx][posy] > 80 :
-                label[posx,posy] = 6
-            elif pixel_values[posx][posy] <=80 & pixel_values[posx][posy] > 50 :
-                label[posx,posy] = 7
-            else :
-                label[posx,posy] = 8
-
-    for posy in range(0, width, 48) :
-        for posx in range(0, height, 39) :
-            level[posx//48,posy//39] = np.around(np.mean(label[posx:posx+48,posy:posy+39]))
-			# s.send(level) ############# for bluetooth!
-    
-
-    pprint.pprint(level)
 
 
 

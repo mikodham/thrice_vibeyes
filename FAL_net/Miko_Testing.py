@@ -19,39 +19,41 @@ import data_transforms
 import cv2
 import time
 
-# Dataset, Models
-dataset_names = sorted(name for name in Datasets.__all__)
-model_names = sorted(name for name in models.__all__)
-# Parser
-parser = argparse.ArgumentParser(description='Testing pan generation',
-                                 formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-parser.add_argument('-d', '--data', metavar='DIR', default=os.getcwd(), help='path to dataset')
-parser.add_argument('-tn', '--tdataName', metavar='Test Data Set Name', default='Kitti_eigen_test_improved',
-                    choices=dataset_names)
-parser.add_argument('-relbase', '--rel_baselne', default=1, help='Relative baseline of testing dataset')
-parser.add_argument('-mdisp', '--max_disp', default=300)  # of the training patch W
-parser.add_argument('-mindisp', '--min_disp', default=2)  # of the training patch W
-parser.add_argument('-b', '--batch_size', metavar='Batch Size', default=1)
-parser.add_argument('-eval', '--evaluate', default=True)
-parser.add_argument('-save', '--save', default=False)
-parser.add_argument('-save_pc', '--save_pc', default=False)
-parser.add_argument('-save_pan', '--save_pan', default=False)
-parser.add_argument('-save_input', '--save_input', default=False)
-parser.add_argument('-w', '--workers', metavar='Workers', default=4)
-parser.add_argument('--sparse', default=False, action='store_true',
-                    help='Depth GT is sparse, automatically seleted when choosing a KITTIdataset')
-parser.add_argument('--print-freq', '-p', default=10, type=int, metavar='N', help='print frequency')
-parser.add_argument('-gpu_no', '--gpu_no', default='1', help='Select your GPU ID, if you have multiple GPU.')
-parser.add_argument('-dt', '--dataset', help='Dataset and training stage directory', default='Kitti_stage2')
-parser.add_argument('-ts', '--time_stamp', help='Model timestamp', default='03-29-14_18')
-parser.add_argument('-m', '--model', help='Model', default='FAL_netB')
-parser.add_argument('-no_levels', '--no_levels', default=49, help='Number of quantization levels in MED')
-parser.add_argument('-dtl', '--details', help='details',
-                    default=',e20es,b4,lr5e-05/checkpoint.pth.tar')
-parser.add_argument('-fpp', '--f_post_process', default=False, help='Post-processing with flipped input')
-parser.add_argument('-mspp', '--ms_post_process', default=True, help='Post-processing with multi-scale input')
-parser.add_argument('-median', '--median', default=False,
-                    help='use median scaling (not needed when training from stereo')
+def init():
+    # Dataset, Models
+    dataset_names = sorted(name for name in Datasets.__all__)
+    model_names = sorted(name for name in models.__all__)
+    # Parser
+    parser = argparse.ArgumentParser(description='Testing pan generation',
+                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument('-d', '--data', metavar='DIR', default=os.getcwd(), help='path to dataset')
+    parser.add_argument('-tn', '--tdataName', metavar='Test Data Set Name', default='Kitti_eigen_test_improved',
+                        choices=dataset_names)
+    parser.add_argument('-relbase', '--rel_baselne', default=1, help='Relative baseline of testing dataset')
+    parser.add_argument('-mdisp', '--max_disp', default=300)  # of the training patch W
+    parser.add_argument('-mindisp', '--min_disp', default=2)  # of the training patch W
+    parser.add_argument('-b', '--batch_size', metavar='Batch Size', default=1)
+    parser.add_argument('-eval', '--evaluate', default=True)
+    parser.add_argument('-save', '--save', default=False)
+    parser.add_argument('-save_pc', '--save_pc', default=False)
+    parser.add_argument('-save_pan', '--save_pan', default=False)
+    parser.add_argument('-save_input', '--save_input', default=False)
+    parser.add_argument('-w', '--workers', metavar='Workers', default=4)
+    parser.add_argument('--sparse', default=False, action='store_true',
+                        help='Depth GT is sparse, automatically seleted when choosing a KITTIdataset')
+    parser.add_argument('--print-freq', '-p', default=10, type=int, metavar='N', help='print frequency')
+    parser.add_argument('-gpu_no', '--gpu_no', default='1', help='Select your GPU ID, if you have multiple GPU.')
+    parser.add_argument('-dt', '--dataset', help='Dataset and training stage directory', default='Kitti_stage2')
+    parser.add_argument('-ts', '--time_stamp', help='Model timestamp', default='03-29-14_18')
+    parser.add_argument('-m', '--model', help='Model', default='FAL_netB')
+    parser.add_argument('-no_levels', '--no_levels', default=49, help='Number of quantization levels in MED')
+    parser.add_argument('-dtl', '--details', help='details',
+                        default=',e20es,b4,lr5e-05/checkpoint.pth.tar')
+    parser.add_argument('-fpp', '--f_post_process', default=False, help='Post-processing with flipped input')
+    parser.add_argument('-mspp', '--ms_post_process', default=True, help='Post-processing with multi-scale input')
+    parser.add_argument('-median', '--median', default=False,
+                        help='use median scaling (not needed when training from stereo')
+    return parser
 
 input_transform = transforms.Compose([
     # data_transforms.ArrayToTensor(),
@@ -65,7 +67,7 @@ target_transform = transforms.Compose([
 ])
 
 
-def display_config(save_path):
+def display_config(args, save_path):
     settings = ''
     settings = settings + '############################################################\n'
     settings = settings + '# FAL-net        -         Pytorch implementation          #\n'
@@ -96,7 +98,7 @@ def ms_pp(input_view, pan_model, flip_grid, disp, min_disp, max_pix):
     return (1 - norm) * disp + norm * dwn_flip_disp
 
 
-def frametodisp(frame):
+def frametodisp(pan_model, frame):
     # print("-------------GET DISPARITY--------------")
     input_left = frame  # INITIAL: (720, 1280, 3)
     # print("TYPE ", type(input_left))
@@ -119,7 +121,7 @@ def frametodisp(frame):
     flip_grid = F.affine_grid(i_tetha, [B, C, H, W])
     flip_grid[:, :, :, 0] = -flip_grid[:, :, :, 0]
 
-    print("INPUT LEFT TYPE ", type(input_left), input_left.shape)
+    # print("INPUT LEFT TYPE ", type(input_left), input_left.shape)
     # frame = np.expand_dims(frame, 0)    # SHAPE:  (1, 3, 720, 1280)
     # to satisfy B, C, H, W = input_left.shape
     disp = pan_model(input_left, min_disp, max_disp, ret_disp=True, ret_subocc=False, ret_pan=False)
@@ -141,21 +143,7 @@ def getFrame(sec):
     return hasFrames, image
 
 
-if __name__ == '__main__':
-    args = parser.parse_args()
-    # os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu_/no
-
-    print('--------Testing on gpu ' + args.gpu_no + '-------')
-    save_path = os.path.join('Test_Results', args.tdataName, args.model, args.time_stamp)
-    if args.f_post_process:
-        save_path = save_path + 'fpp'
-    if args.ms_post_process:
-        save_path = save_path + 'mspp'
-    print('=> Saving to {}'.format(save_path))
-    if not os.path.exists(save_path):
-        os.makedirs(save_path)
-    display_config(save_path)
-
+def load_model(args):
     print("-------------PAN_MODEL--------------")
     # create pan model
     model_dir = os.path.join(args.dataset, args.time_stamp, args.model + args.details)
@@ -166,6 +154,29 @@ if __name__ == '__main__':
     print("=> using pre-trained model for pan '{}'".format(pan_model))
     pan_model = models.__dict__[pan_model](pan_network_data, no_levels=args.no_levels).cuda()
     pan_model = torch.nn.DataParallel(pan_model, device_ids=[0]).cuda()
+    return pan_model
+
+
+def test_GPU(args):
+    print('--------Testing on gpu ' + args.gpu_no + '-------')
+    save_path = os.path.join('Test_Results', args.tdataName, args.model, args.time_stamp)
+    if args.f_post_process:
+        save_path = save_path + 'fpp'
+    if args.ms_post_process:
+        save_path = save_path + 'mspp'
+    print('=> Saving to {}'.format(save_path))
+    if not os.path.exists(save_path):
+        os.makedirs(save_path)
+    display_config(args, save_path)
+
+
+if __name__ == '__main__':
+    parser = init()
+    args = parser.parse_args()
+    # os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu_/no
+
+    test_GPU(args)
+    pan_model = load_model(args)
 
     print("-------------DEPTH ESTIMATE--------------")
     vid_file = 'S10P_IdeaFactory1'  # 'S10P_NoZoom.mp4'  #
@@ -194,7 +205,7 @@ if __name__ == '__main__':
             torch_frame = torch.from_numpy(frame)
             torch_frame = torch_frame.type(torch.FloatTensor)
             prev = time.time()
-            disp = frametodisp(torch_frame)  # return <class 'torch.Tensor'>, torch.Size([1, 1, 720, 1280])
+            disp = frametodisp(pan_model, torch_frame)  # return <class 'torch.Tensor'>, torch.Size([1, 1, 720, 1280])
             disparity = disp.squeeze().cpu().numpy()
             disparity = 256 * np.clip(disparity / (np.percentile(disparity, 95) + 1e-6), 0, 1)
             print("TIME SPENT ", time.time()-prev)
