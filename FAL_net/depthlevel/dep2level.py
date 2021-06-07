@@ -31,15 +31,16 @@ def dep2level(frame):  # input is disparity
     width, height = frame.shape  # 480, 140
     label = np.zeros((width, height))
     level = np.zeros((10,10))
-    # many = (frame > 230).astype(int)
-    many = (frame > 250).astype(int)
-    for boundary in [230, 200, 170, 140, 120, 80, 60, 0]:
-        many += (frame > boundary).astype(int)
+    many = (frame < 50).astype(int)
+    for boundary in [90, 125, 155, 180, 200, 215, 225]:
+        many += (frame < boundary).astype(int)
 
     for posx in range(0, width, width//10) :
         for posy in range(0, height, height//10):
-            level[posx//(width//10), posy//(height//10)] = np.around(np.mean(many[posx:posx+(width//10),posy:posy+(height//10)]))
-    # print(level)
+            mean = np.around(np.mean(many[posx:posx+(width//10), posy:posy+(height//10)]))
+            level[posx // (width // 10), posy // (height // 10)] = mean
+            many[posx:posx+(width//10),posy:posy+(height//10)] = mean
+    print(level)
     return many
 
     # print(many)

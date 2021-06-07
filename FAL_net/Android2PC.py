@@ -37,7 +37,7 @@ args = parser.parse_args()
 Miko_Testing.test_GPU(args)
 pan_model = Miko_Testing.load_model(args)
 
-url = 'http://172.20.51.63:8080/video'
+url = 'http://143.248.252.57:8080/video'
 cv2.startWindowThread()
 cv2.namedWindow("preview")
 cv2.startWindowThread()
@@ -79,13 +79,13 @@ while True:
             print("range is %d - %d: %d" % (ka, ka+10, many))
         break
         '''
-        level = 256/8 * dl2.dep2level(disparity)
+        level = 255/9 * dl2.dep2level(disparity)
         # -------------------------------------
         print("Count", c, "TIME SPENT ", time.time() - prev)
         results.append(disparity)
         cv2.imshow("DisparityMap", cv2.applyColorMap(np.array(disparity, dtype=np.uint8), cv2.COLORMAP_JET))
         q = cv2.waitKey(1)
-        cv2.resizeWindow('LevelMap', SIZE)
+        # cv2.resizeWindow('LevelMap', SIZE)
         cv2.imshow("LevelMap", cv2.applyColorMap(np.array(level, dtype=np.uint8), cv2.COLORMAP_JET))
     if q == ord("q"):
         break
