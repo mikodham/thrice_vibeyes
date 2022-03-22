@@ -37,7 +37,7 @@ args = parser.parse_args()
 Miko_Testing.test_GPU(args)
 pan_model = Miko_Testing.load_model(args)
 
-url = 'http://143.248.252.57:8080/video'
+url = 'http://192.249.29.243:8080/video'
 cv2.startWindowThread()
 cv2.namedWindow("preview")
 cv2.startWindowThread()

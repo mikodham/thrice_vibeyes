@@ -31,8 +31,8 @@ def dep2level(frame):  # input is disparity
     width, height = frame.shape  # 480, 140
     label = np.zeros((width, height))
     level = np.zeros((10,10))
-    many = (frame < 50).astype(int)
-    for boundary in [90, 125, 155, 180, 200, 215, 225]:
+    many = (frame < 60).astype(int)
+    for boundary in [100, 150, 200, 220, 240, 250, 252]:
         many += (frame < boundary).astype(int)
 
     for posx in range(0, width, width//10) :
